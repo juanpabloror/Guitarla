@@ -5,19 +5,86 @@ import { db } from './data/db'
 
 function App() {
   const [data, setData] = useState(db)
+  const [cart, setCart] = useState([])
+
+  const MAX_ITEMS = 5
+  const MIN_ITEM = 1
+
+  function addToCart(item){
+    const exists = cart.findIndex(guitar => guitar.id === item.id)
+    if(exists === -1){
+      item.quantity = 1
+      console.log('Agregando arreglo...');
+      setCart([item, ...cart])
+
+    }else{
+      console.log('Agregando elemento copiado...');
+      const updatedCart = [...cart];
+      updatedCart[exists].quantity++;
+      setCart(updatedCart)
+    }
+  }
+
+
+  function removeFromCart (id){
+    setCart(prevCart => prevCart.filter(guitar => guitar.id !== id) )
+  }
+
+  function increaseQuantity(id){
+    const updatedCart = cart.map( item => {
+      if (item.id === id && item.quantity < MAX_ITEMS){
+        return{
+          ...item,
+          quantity: item.quantity + 1
+        }
+      }
+      return item
+    })
+
+    setCart(updatedCart)
+  }
+
+  function clearCart(){
+    setCart([])
+  }
+
+  function decreaseQuantity(id) {
+    const updatedCart = cart.map(item => {
+      if(item.id === id && item.quantity !== MIN_ITEM){
+        return{
+          ...item,
+          quantity: item.quantity - 1
+        }
+      }
+      return item
+    })
+    setCart(updatedCart)
+  }
 
   return (
     <>
-    <Header />
+    <Header 
+    cart={cart} 
+    removeFromCart={removeFromCart} 
+    decreaseQuantity={decreaseQuantity} 
+    increaseQuantity={increaseQuantity}
+    clearCart = {clearCart}
+    />
     <main className="container-xl mt-5">
         <h2 className="text-center">Nuestra Colección</h2>
 
         <div className="row mt-5">
-           <Guitar/>
-           <Guitar/>
-           <Guitar/>
-           <Guitar/>
-           <Guitar/>    
+          {data.map((guitar) => (
+            <Guitar
+              key={guitar.id}
+              guitar={guitar}
+              cart = {cart}
+              setCart={setCart}
+              addToCart = {addToCart}
+              
+            /> 
+          ))}
+           
         </div>
     </main>
 
